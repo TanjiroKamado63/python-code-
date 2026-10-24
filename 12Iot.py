@@ -1,0 +1,52 @@
+RASPBERRY PI TERMINAL COMMANDS
+sudo apt update
+sudo apt install -y python3-pip python3-serial python3-rpi.gpio i2c-tools
+pip3 install RPLCD adafruit-circuitpython-fingerprint mfrc522
+sudo raspi-config
+# Enable I2C and SPI; enable hardware serial and disable serial login shell.
+sudo reboot
+i2cdetect -y 1
+# If LCD appears as 0x3F, set address=0x3F instead of 0x27.
+nano access_control.py
+python3 access_control.py
+RFID UID test program — source code
+from mfrc522 import SimpleMFRC522
+import RPi.GPIO as GPIO
+reader = SimpleMFRC522()
+try:
+    print("Place RFID card...")
+    while True:
+        uid, text = reader.read()
+        print("RFID UID:", uid)
+        print("Data:", text)
+        break
+finally:
+    GPIO.cleanup()
+Fingerprint enrollment — source code
+import serial
+import adafruit_fingerprint
+uart = serial.Serial("/dev/serial0", baudrate=57600, timeout=1)
+finger = adafruit_fingerprint.Adafruit_Fingerprint(uart)
+location = int(input("Enter fingerprint ID (1-127): "))
+print("Place finger...")
+while finger.get_image() != adafruit_fingerprint.OK:
+    pass
+if finger.image_2_tz(1) != adafruit_fingerprint.OK:
+    print("Image conversion failed")
+    exit()
+print("Remove finger")
+import time
+time.sleep(2)
+print("Place same finger again...")
+while finger.get_image() != adafruit_fingerprint.OK:
+    pass
+if finger.image_2_tz(2) != adafruit_fingerprint.OK:
+    print("Image conversion failed")
+    exit()
+if finger.create_model() != adafruit_fingerprint.OK:
+    print("Fingerprint mismatch")
+    exit()
+if finger.store_model(location) == adafruit_fingerprint.OK:
+    print("Fingerprint enrolled successfully")
+else:
+    print("Failed to store fingerprint")

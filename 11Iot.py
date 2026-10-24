@@ -1,0 +1,39 @@
+RASPBERRY PI TERMINAL COMMANDS
+sudo apt update
+sudo apt install -y python3-pip python3-rpi.gpio
+python3 -m venv myenv
+source myenv/bin/activate
+pip install paho-mqtt
+nano test.py
+python3 test.py
+MQTT subscriber code — cleaned from source
+import paho.mqtt.client as mqtt
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BOARD)
+GPIO.setwarnings(False)
+LED = 12
+GPIO.setup(LED, GPIO.OUT, initial=GPIO.LOW)
+def on_connect(client, userdata, flags, reason_code, properties):
+    print("Connected with result code:", reason_code)
+    client.subscribe("led")
+    print("Subscribed to topic: led")
+def on_message(client, userdata, msg):
+    message = msg.payload.decode("utf-8").strip().lower()
+    print("Received:", message)
+    if message == "on":
+        GPIO.output(LED, GPIO.HIGH)
+        print("LED ON")
+    elif message == "off":
+        GPIO.output(LED, GPIO.LOW)
+        print("LED OFF")
+    else:
+        print("Unknown message:", message)
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+client.on_connect = on_connect
+client.on_message = on_message
+client.connect("broker.emqx.io", 1883, 60)
+print("Waiting for MQTT messages...")
+try:
+    client.loop_forever()
+finally:
+    GPIO.cleanup()

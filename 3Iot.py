@@ -1,0 +1,27 @@
+cd ~
+sudo apt-get update
+sudo apt-get install -y build-essential python3-dev python3-smbus git i2c-tools
+git clone https://github.com/adafruit/Adafruit_Python_ADS1x15.git
+cd Adafruit_Python_ADS1x15
+sudo python3 setup.py install
+cd examples
+python3 sampletest.py
+sudo apt-get install -y python3-matplotlib python3-pip
+sudo pip install drawnow
+git clone https://github.com/tyitraspberrypi/Adafruit_Python_ADS1x1z_graph.git
+ADC channel reading code shown in source
+code:
+import time
+import board
+import busio
+import adafruit_ads1x15.ads1015 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
+i2c = busio.I2C(board.SCL, board.SDA)
+ads = ADS.ADS1015(i2c)
+chan = AnalogIn(ads, ADS.P0)
+# Differential input example:
+# chan = AnalogIn(ads, ADS.P0, ADS.P1)
+print("{:>5}\t{:>5}".format("raw", "v"))
+while True:
+    print("{:>5}\t{:>5.3f}".format(chan.value, chan.voltage))
+    time.sleep(0.5)

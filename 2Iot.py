@@ -1,0 +1,46 @@
+RASPBERRY PI TERMINAL COMMANDS
+
+sudo apt update
+sudo apt install -y python3-rpi.gpio
+nano test.py
+python3 test.py
+Python source code
+import time
+import datetime
+import RPi.GPIO as GPIO
+CLK, DIO = 23, 24
+HEX = [0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F]
+GPIO.setmode(GPIO.BCM)
+GPIO.setup([CLK, DIO], GPIO.OUT)
+def send_byte(b):
+    for i in range(8):
+        GPIO.output(CLK, 0)
+        GPIO.output(DIO, (b >> i) & 1)
+        GPIO.output(CLK, 1)
+    GPIO.output(CLK, 0)
+    GPIO.setup(DIO, GPIO.IN)
+    GPIO.output(CLK, 1)
+    GPIO.output(CLK, 0)
+    GPIO.setup(DIO, GPIO.OUT)
+def start_stop(func):
+    GPIO.output(CLK, 1)
+    GPIO.output(DIO, 1)
+    GPIO.output(DIO, 0)
+    GPIO.output(CLK, 0)
+    func()
+    GPIO.output(CLK, 0)
+    GPIO.output(DIO, 0)
+    GPIO.output(CLK, 1)
+    GPIO.output(DIO, 1)
+while True:
+    now = datetime.datetime.now()
+    digits = [now.hour // 10, now.hour % 10, now.minute // 10, now.minute % 10]
+    start_stop(lambda: send_byte(0x40))
+    def write_digits():
+        send_byte(0xC0)
+        for i, d in enumerate(digits):
+            seg = HEX[d] | (0x80 if i == 1 and now.second % 2 == 0 else 0)
+            send_byte(seg)
+    start_stop(write_digits)
+    start_stop(lambda: send_byte(0x8A))
+    time.sleep(0.5)

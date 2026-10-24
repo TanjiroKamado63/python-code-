@@ -1,0 +1,76 @@
+RASPBERRY PI TERMINAL COMMANDS
+sudo apt update
+sudo apt install -y python3-flask python3-rpi.gpio
+nano relay.py
+python3 relay.py
+# In a second terminal:
+hostname -I
+# Open the Pi's IP address on port 5000 in a browser.
+Flask relay control — code cleaned from source
+from flask import Flask, render_template_string
+import RPi.GPIO as GPIO
+app = Flask(__name__)
+RELAY = 17
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(RELAY, GPIO.OUT)
+GPIO.output(RELAY, GPIO.HIGH)
+HTML = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Relay Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 70px;
+        }
+        .status {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        button {
+            font-size: 25px;
+            padding: 20px 40px;
+            margin: 15px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+        }
+        .on {
+            background: green;
+        }
+        .off {
+            background: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Raspberry Pi Relay Control</h1>
+    <p class="status">Relay Control</p>
+    <form action="/on" method="get">
+        <button class="on" type="submit">ON</button>
+    </form>
+    <form action="/off" method="get">
+        <button class="off" type="submit">OFF</button>
+    </form>
+</body>
+</html>
+"""
+@app.route("/")
+def index():
+    return render_template_string(HTML)
+@app.route("/on")
+def relay_on():
+    GPIO.output(RELAY, GPIO.LOW)
+    return render_template_string(HTML)
+@app.route("/off")
+def relay_off():
+    GPIO.output(RELAY, GPIO.HIGH)
+    return render_template_string(HTML)
+if __name__ == "__main__":
+    try:
+        app.run(host="0.0.0.0", port=5000, debug=False)
+    finally:
+        GPIO.cleanup()
