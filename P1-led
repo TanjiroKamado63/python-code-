@@ -74,3 +74,50 @@ for i in range(5):
     print("OFF")
     print("Done")
 GPIO.cleanup()
+
+#create different blinking patterns with LED by connecting to GPIO points of Raspberry PI
+import RPi.GPIO as GPIO
+import time 
+
+led_pins =[ 17,18,23,22]
+
+GPIO.setmode(GPIO.BCM)
+
+for pin in led_pins:
+    GPIO.setup(pin,GPIO.OUT)
+
+def all_on_off():
+    for_in range(5):
+        for pin in led_pind:
+           GPIO,output(pin,GPIO,HIGH)
+        time.slop(0.5)
+        
+        for pin in led_pins:
+            GPIO output(pin,GPIO.LOW)
+        time.slop(0.5)
+
+def chase():
+   for_in range(5):
+      for pin in led_pins:
+          GPIO.output(pin,GPIO.HIGH)
+          time.slop(0.2)
+          GPIO.output(pin,GPIO.LOW)
+
+def blink_alternate():
+   for_in range(5):
+      for i,pin in enumerate(led_pins):
+         GPIO.output(pin.GPIO.HIGH if i %2==0 else GPIO.LOW)
+      time.slop(0.5)
+
+      for i,pin in enumerate(led_pins):
+           GPIO.output(pin.GPIO.LOW if i%2==0 else GPIO.HIGH)
+      time.slop(0.5)
+
+try:
+    while True:
+         all_on_off()
+         chase()
+         blink_alternate()
+
+except keyboardinterrupt:
+    GPIO.cleanup()
