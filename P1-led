@@ -4,6 +4,7 @@ sudo apt update
 sudo apt install -y python3-rpi.gpio
 nano led_blink.py
 python3 led_blink.py
+Code:
 1A. One LED — source code, indentation cleaned
 import RPi.GPIO as GPIO
 import time
