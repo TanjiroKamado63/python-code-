@@ -8,6 +8,7 @@ hostname -I
 # Open the Pi's IP address on port 5000 in a browser.
 Flask relay control — code cleaned from source
 from flask import Flask, render_template_string
+CODE:
 import RPi.GPIO as GPIO
 app = Flask(__name__)
 RELAY = 17
